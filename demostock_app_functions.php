@@ -47,38 +47,38 @@ http://localhost/demostock-api/demostock_app.php?action=search
 			$customer_result = $this->qry($is_customer_exist,3);
 
 			if($customer_result > 0){
-				$paramQuery = "SELECT * FROM customer_price_quote_parameters WHERE (1=1)";
-				$where = "";
-				$cond  = " AND ";
-				if($data['shape'] != "")
-				{
-					$where .= $cond." (".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
-					$cond = " OR ";
-				}
-				if($data['color'] != "")
-				{
-					$where .= $cond." (".$data['color']."  BETWEEN dp_color_from AND dp_color_to )";
-					$cond = " OR ";
-				}
-				// if($data['size'] != "")
+				// $paramQuery = "SELECT * FROM customer_price_quote_parameters WHERE (1=1)";
+				// $where = "";
+				// $cond  = " AND ";
+				// if($data['shape'] != "")
 				// {
-				// 	$where .= $cond."(".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
+				// 	$where .= $cond." (".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
 				// 	$cond = " OR ";
 				// }
-				if($data['clarity'] != "")
-				{
-					$where .= $cond."(".$data['clarity']."  BETWEEN dp_clarity_from AND dp_clarity_to )";
-					$cond = " OR ";
-				}
-				if($data['discount'] != "")
-				{
-					$where .= $cond." (".$data['discount']."  BETWEEN dp_discount_from AND dp_discount_to )";
-				}
+				// if($data['color'] != "")
+				// {
+				// 	$where .= $cond." (".$data['color']."  BETWEEN dp_color_from AND dp_color_to )";
+				// 	$cond = " OR ";
+				// }
+				// // if($data['size'] != "")
+				// // {
+				// // 	$where .= $cond."(".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
+				// // 	$cond = " OR ";
+				// // }
+				// if($data['clarity'] != "")
+				// {
+				// 	$where .= $cond."(".$data['clarity']."  BETWEEN dp_clarity_from AND dp_clarity_to )";
+				// 	$cond = " OR ";
+				// }
+				// if($data['discount'] != "")
+				// {
+				// 	$where .= $cond." (".$data['discount']."  BETWEEN dp_discount_from AND dp_discount_to )";
+				// }
 
-				 echo $paramQuery . $where; 
-				$resources = $this->qry($paramQuery . $where,2);
-					echo '<pre>'; print_r($resources); die;
-				$arrangeArray = array_column($resources, 'dp_parameters_code');
+				//  echo $paramQuery . $where; 
+				// $resources = $this->qry($paramQuery . $where,2);
+				// 	echo '<pre>'; print_r($resources); die;
+				// $arrangeArray = array_column($resources, 'dp_parameters_code');
 			}else{
 				$paramQuery = "SELECT dp_parameters_code FROM diamond_parameters WHERE ( 1 = 1 )";
 				$where = "";
