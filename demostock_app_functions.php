@@ -47,38 +47,54 @@ http://localhost/demostock-api/demostock_app.php?action=search
 			$customer_result = $this->qry($is_customer_exist,3);
 
 			if($customer_result > 0){
-				// $paramQuery = "SELECT * FROM customer_price_quote_parameters WHERE (1=1)";
-				// $where = "";
-				// $cond  = " AND ";
-				// if($data['shape'] != "")
+				$paramQuery = "SELECT * FROM customer_price_quote_parameters WHERE (1=1)";
+				$where = "";
+				$cond  = " AND ";
+				if($data['shape'] != "")
+				{
+					$shapeData = explode(',', $data['shape']);
+					foreach($shapeData as $shape){
+						$where .= $cond." (".$shape."  BETWEEN dp_shape_from AND dp_shape_to )";
+						$cond = " OR ";
+					}
+					
+				}
+				if($data['color'] != "")
+				{
+					$colorData = explode(',', $data['color']);
+					foreach($colorData as $color){
+						$where .= $cond." (".$color."  BETWEEN dp_color_from AND dp_color_to )";
+						$cond = " OR ";
+					}
+				}
+				// if($data['size'] != "")
 				// {
-				// 	$where .= $cond." (".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
+				// 	$where .= $cond."(".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
 				// 	$cond = " OR ";
 				// }
-				// if($data['color'] != "")
-				// {
-				// 	$where .= $cond." (".$data['color']."  BETWEEN dp_color_from AND dp_color_to )";
-				// 	$cond = " OR ";
-				// }
-				// // if($data['size'] != "")
-				// // {
-				// // 	$where .= $cond."(".$data['shape']."  BETWEEN dp_shape_from AND dp_shape_to )";
-				// // 	$cond = " OR ";
-				// // }
-				// if($data['clarity'] != "")
-				// {
-				// 	$where .= $cond."(".$data['clarity']."  BETWEEN dp_clarity_from AND dp_clarity_to )";
-				// 	$cond = " OR ";
-				// }
-				// if($data['discount'] != "")
-				// {
-				// 	$where .= $cond." (".$data['discount']."  BETWEEN dp_discount_from AND dp_discount_to )";
-				// }
+				if($data['clarity'] != "")
+				{
+					$clarityData = explode(',', $data['clarity']);
+					foreach($clarityData as $clarity){
+						$where .= $cond." (".$clarity."  BETWEEN dp_clarity_from AND dp_clarity_to )";
+						$cond = " OR ";
+					}
+			
+				}
+				if($data['discount'] != "")
+				{
 
-				//  echo $paramQuery . $where; 
-				// $resources = $this->qry($paramQuery . $where,2);
-				// 	echo '<pre>'; print_r($resources); die;
-				// $arrangeArray = array_column($resources, 'dp_parameters_code');
+					$discountData = explode(',', $data['discount']);
+					foreach($discountData as $discount){
+						$where .= $cond." (".$discount."  BETWEEN dp_discount_from AND dp_discount_to )";
+						$cond = " OR ";
+					}
+				}
+
+				 echo $paramQuery . $where; 
+				$resources = $this->qry($paramQuery . $where,2);
+					echo '<pre>'; print_r($resources); die;
+				$arrangeArray = array_column($resources, 'dp_parameters_code');
 			}else{
 				$paramQuery = "SELECT dp_parameters_code FROM diamond_parameters WHERE ( 1 = 1 )";
 				$where = "";
