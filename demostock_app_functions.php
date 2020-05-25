@@ -51,6 +51,7 @@ http://localhost/demostock-api/demostock_app.php?action=search
 				$where = "";
 				$cond  = " AND ";
 				$customerData = [];
+				$is_customer_quote_exits = true;
 				if($data['shape'] != "")
 				{
 					$shapeData = explode(',', $data['shape']);
@@ -60,8 +61,11 @@ http://localhost/demostock-api/demostock_app.php?action=search
 					}
 
 					// $shape_result = $this->qry($paramQuery . $where,3);
-					if($this->qry($paramQuery . $where,3) > 0 )
+					if($this->qry($paramQuery . $where,3) > 0 ){
 							$customerData['shape'] = $data['shape'];
+							$is_customer_quote_exits = true;
+						}else
+						$is_customer_quote_exits = false;
 					$where = "";
 					$cond  = " AND ";
 				}
@@ -73,8 +77,11 @@ http://localhost/demostock-api/demostock_app.php?action=search
 						$cond = " OR ";
 					}
 					// $color_result = $this->qry($paramQuery . $where,3);
-					if($this->qry($paramQuery . $where,3) > 0 )
+					if($this->qry($paramQuery . $where,3) > 0 ){
 							$customerData['color'] = $data['color'];
+							$is_customer_quote_exits = true;
+						}else
+						$is_customer_quote_exits = false;
 					$where = "";
 					$cond  = " AND ";
 				}
@@ -92,8 +99,11 @@ http://localhost/demostock-api/demostock_app.php?action=search
 					}
 
 					// $clarity_result = $this->qry($paramQuery . $where,3);
-					if($this->qry($paramQuery . $where,3) > 0 )
+					if($this->qry($paramQuery . $where,3) > 0 ){
 							$customerData['clarity'] = $data['clarity'];
+							$is_customer_quote_exits = true;
+						}else
+						$is_customer_quote_exits = false;
 					$where = "";
 					$cond  = " AND ";
 			
@@ -108,14 +118,23 @@ http://localhost/demostock-api/demostock_app.php?action=search
 					}
 
 					// $discount_result = $this->qry($paramQuery . $where,3);
-					if($this->qry($paramQuery . $where,3) > 0 )
+					if($this->qry($paramQuery . $where,3) > 0 ){
 							$customerData['discount'] = $data['discount'];
+							$is_customer_quote_exits = true;
+						}else
+						$is_customer_quote_exits = false;
 					$where = "";
 					$cond  = " AND ";
 				}
 
 				 if(!empty($customerData)){
-				 	$return_arr = $this->getDiamondData($customerData);
+				 	// echo '<pre>'; print_r($customerData); die;
+				 	 if( $is_customer_quote_exits){
+				 	 	$return_arr = $this->getDiamondData($customerData);
+				 	 }else{
+				 	 	$return_arr['flag'] = true;
+						$return_arr['data'] = [];
+				 	}
 				 }else
 				 {
 					$return_arr['flag'] = true;
@@ -134,7 +153,7 @@ http://localhost/demostock-api/demostock_app.php?action=search
 
 	public function getDiamondData($data)
 	{
-		$paramQuery = "SELECT dp_parameters_code FROM diamond_parameters WHERE ( 1 = 1 )";
+		$paramQuery = "SELECT dp_parameters_code,dp_table_type FROM diamond_parameters WHERE ( 1 = 1 )";
 		$where = "";
 		$cond  = " AND ";
 		if($data['shape'] != "")
@@ -163,11 +182,54 @@ http://localhost/demostock-api/demostock_app.php?action=search
 		}
 
 		$resources = $this->qry($paramQuery . $where,2);
+		// echo '<pre>';  print_r($resources); die;
+		$tableTypeArray = array_column($resources, 'dp_table_type');
 	 	$arrangeArray = array_column($resources, 'dp_parameters_code');
-		$imp = "'" . implode( "','", ($arrangeArray) ) . "'";
-		$stockDataQuery = "SELECT * FROM stock WHERE st_shape IN (".$imp.")  OR st_col IN (".$imp.") OR st_size = '".$data['size']."' OR st_cla IN (".$imp.") OR st_dis = '".$data['discount']."'  " ;
-		$stockResources = $this->qry($stockDataQuery,2);
-		// echo $this->qry($stockDataQuery,3);
+		// $imp = "'" . implode( "','", ($arrangeArray) ) . "'";
+		foreach($resources as $key=>$value)
+		{
+			if($value['dp_table_type'] == 0 )
+			{
+				$shapeData[] = $value['dp_parameters_code'];
+			}
+			if($value['dp_table_type'] == 2 )
+			{
+				$colorData[] = $value['dp_parameters_code'];
+			}
+			if($value['dp_table_type'] == 3 )
+			{
+				$clarityData[] = $value['dp_parameters_code'];
+			}
+			// if($value['dp_table_type'] == 0 )
+			// {
+			// 	$shapeData[] = $value['dp_parameters_code'];
+			// }
+
+		}
+
+		 $stockDataQuery = "SELECT * FROM stock WHERE 1=1 ";
+		 // st_shape IN ("."'" . implode( "','", ($shapeData) ) . "'".")  AND st_col IN ("."'" . implode( "','", ($colorData) ) . "'".") AND st_size = '".$data['size']."' AND st_cla IN ("."'" . implode( "','", ($clarityData) ) . "'".") AND st_dis = '".$data['discount']."'  " ;
+
+		$where = "";
+		
+		if(!empty($shapeData)){
+			$where .=  " AND st_shape IN ("."'" . implode( "','", ($shapeData) ) . "'".")";
+		}
+		if(!empty($colorData)){
+			$where .=  " AND st_col IN ("."'" . implode( "','", ($colorData) ) . "'".")";
+		}
+		if(!empty($clarityData)){
+			$where .=  " AND st_cla IN ("."'" . implode( "','", ($clarityData) ) . "'".")";
+		}
+		if($data['size'] != ''){
+			$where .=  " AND st_size = '".$data['size']."' ";
+		}
+		if($data['discount'] != ''){
+			$where .=  " AND st_dis = '".$data['discount']."' ";
+		}
+		// echo $stockDataQuery. $where;
+		$stockResources = $this->qry($stockDataQuery. $where,2);
+		// echo $this->qry($stockDataQuery . $where,3);
 		$return_arr['flag'] = true;
 		$return_arr['data'] = !empty($stockResources) ? $stockResources : [];
 
